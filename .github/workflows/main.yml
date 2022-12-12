@@ -1,0 +1,25 @@
+name: Link command
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  checklist_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Checklist Test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Extract the issue number and the comment body from the event data
+          ISSUE_NUMBER=$(jq -r '.issue.number' $GITHUB_EVENT_PATH)
+          COMMENT_BODY=$(jq -r '.comment.body' $GITHUB_EVENT_PATH)
+          if [[ "$COMMENT_BODY" == *"/link"* ]]; then
+            # Add the URL as a comment to the issue
+            curl -H "Authorization: token $GITHUB_TOKEN" -X POST \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/comments" \
+              -d '{"body": "[test](https://github.com/stavares843/command-bot/blob/main/test.md)"
+           }'
+           fi
